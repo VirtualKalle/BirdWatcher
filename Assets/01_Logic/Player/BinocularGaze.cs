@@ -24,10 +24,7 @@ public class BinocularGaze : MonoBehaviour
 
         cam = Camera.main;
     }
-
-    void Start()
-    {
-    }
+    
 
     void Update()
     {
@@ -38,20 +35,6 @@ public class BinocularGaze : MonoBehaviour
 
     }
 
-    private void FrustumPlaneGaze()
-    {
-        planes = GeometryUtility.CalculateFrustumPlanes(cam);
-
-        for (int i = 0; i < birds.Count; i++)
-        {
-
-            if (GeometryUtility.TestPlanesAABB(planes, birds[i].GetComponentInChildren<Collider>().bounds))
-            {
-                Debug.Log(birdManager.name + " has been detected!");
-                birds[i].SpottedByGaze();
-            }
-        }
-    }
 
     void VectorDotGaze(Transform focusPoint)
     {

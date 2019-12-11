@@ -6,13 +6,14 @@ public class BirdManager : MonoBehaviour
 {
 
     [SerializeField] BirdLandingSpot[] birdLandingSpots;
+    List<BirdLandingSpot> UnoccupiedSpots;
     [SerializeField] GameObject birdPrefab;
     public List<BirdBehavior> birds;
 
     private void Awake()
     {
         UpdateListOfLandingSpots();
-        
+        UnoccupiedSpots = new List<BirdLandingSpot>(birdLandingSpots);
     }
 
     // Start is called before the first frame update
@@ -26,17 +27,31 @@ public class BirdManager : MonoBehaviour
         birdLandingSpots = FindObjectsOfType<BirdLandingSpot>();
     }
 
-    public Transform GetLandingSpot(TreeType desiredTreeType)
+    public BirdLandingSpot GetNewLandingSpot(TreeType desiredTreeType)
     {
-        for (int i = 0; i < birdLandingSpots.Length; i++)
+        for (int i = 0; i < UnoccupiedSpots.Count; i++)
         {
-            if (birdLandingSpots[i].GetTreeType() == desiredTreeType)
+            if (UnoccupiedSpots[i].GetTreeType() == desiredTreeType)
             {
-                return birdLandingSpots[i].transform;
+                Debug.Log("found " + UnoccupiedSpots[i]);
+                BirdLandingSpot toReturn = UnoccupiedSpots[i];
+                UnoccupiedSpots.Remove(UnoccupiedSpots[i]);
+                return toReturn;
             }
         }
-
+        Debug.Log("didnt find " + desiredTreeType);
         return null;
+    }
+
+    public BirdLandingSpot GetNewLandingSpot()
+    {
+        TreeType desiredTreeType = (TreeType)Random.Range(0, 1);
+        return GetNewLandingSpot(desiredTreeType);
+    }
+
+    public void LeaveLandinSpot(BirdLandingSpot spot)
+    {
+        UnoccupiedSpots.Add(spot);
     }
 
     private void SpawnBirds(float ratio = 1f)
@@ -52,6 +67,8 @@ public class BirdManager : MonoBehaviour
         {
             bird = Instantiate(birdPrefab, birdLandingSpots[i].transform.position, birdLandingSpots[i].transform.rotation);
             birds.Add(bird.GetComponent<BirdBehavior>());
+            bird.GetComponent<BirdBehavior>().currentLandingSpot = birdLandingSpots[i];
+            UnoccupiedSpots.Remove(birdLandingSpots[i]);
         }
     }
 
