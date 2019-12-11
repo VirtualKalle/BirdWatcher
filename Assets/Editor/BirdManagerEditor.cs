@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(BirdManager))]
-public class LevelScriptEditor : Editor
+public class BirdManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
@@ -12,7 +12,7 @@ public class LevelScriptEditor : Editor
 
         if (GUILayout.Button("UpdateLandingSpots"))
         {
-            birdManager.UpdateLandingSpots();
+            birdManager.UpdateListOfLandingSpots();
         }
     }
 }

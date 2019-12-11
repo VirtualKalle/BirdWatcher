@@ -9,23 +9,34 @@ public class BirdManager : MonoBehaviour
     [SerializeField] GameObject birdPrefab;
     public List<BirdBehavior> birds;
 
+    private void Awake()
+    {
+        UpdateListOfLandingSpots();
+        
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        UpdateLandingSpots();
-        SpawnBirds();
+        SpawnBirds(0.5f);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void UpdateLandingSpots()
+    public void UpdateListOfLandingSpots()
     {
         birdLandingSpots = FindObjectsOfType<BirdLandingSpot>();
+    }
+
+    public Transform GetLandingSpot(TreeType desiredTreeType)
+    {
+        for (int i = 0; i < birdLandingSpots.Length; i++)
+        {
+            if (birdLandingSpots[i].GetTreeType() == desiredTreeType)
+            {
+                return birdLandingSpots[i].transform;
+            }
+        }
+
+        return null;
     }
 
     private void SpawnBirds(float ratio = 1f)
@@ -36,6 +47,7 @@ public class BirdManager : MonoBehaviour
         //Create a randomized queue of landingspots
 
         GameObject bird;
+
         for (int i = 0; i < nrOfBirdsToSpawn; i++)
         {
             bird = Instantiate(birdPrefab, birdLandingSpots[i].transform.position, birdLandingSpots[i].transform.rotation);

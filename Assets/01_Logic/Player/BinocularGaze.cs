@@ -59,11 +59,10 @@ public class BinocularGaze : MonoBehaviour
         {
             float angle = Mathf.Acos(Vector3.Dot((focusPoint.position - cam.transform.position).normalized, (birds[i].transform.position - cam.transform.position).normalized)) * Mathf.Rad2Deg;
             //Debug.Log(birds[i].transform.position);
-            Debug.Log(angle);
+            //Debug.Log(angle);
 
             if (angle < 10)
             {
-                Debug.Log(birdManager.name + " has been detected!");
                 birds[i].SpottedByGaze();
             }
         }

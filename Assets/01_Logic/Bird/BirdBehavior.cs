@@ -4,14 +4,21 @@ using UnityEngine;
 
 public class BirdBehavior : MonoBehaviour
 {
+    enum BirdState {Idle, Spotted, Flying }
+    [SerializeField] BirdState birdState = BirdState.Idle;
+
     private Animator animator;
     private bool spottedCoolDown = false;
-
+    public float flightProgress;
+    Transform startTransform;
+    Transform finishTransform;
+    BirdManager birdManager;
 
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        birdManager = FindObjectOfType<BirdManager>();
     }
 
     // Start is called before the first frame update
@@ -28,9 +35,10 @@ public class BirdBehavior : MonoBehaviour
 
     public void SpottedByGaze()
     {
-        if (!spottedCoolDown)
+        if (!spottedCoolDown && birdState == BirdState.Idle)
         {
-            animator.SetBool("isSpotted", true);
+            birdState = BirdState.Spotted;
+            animator.SetInteger("birdState", (int) birdState);
         }
     }
 
@@ -53,8 +61,43 @@ public class BirdBehavior : MonoBehaviour
         spottedCoolDown = false;
     }
 
-    void FlyToNextSpot()
+    public void FlyToNextSpot()
     {
 
+        startTransform = transform;
+        finishTransform = birdManager.GetLandingSpot(TreeType.Plain);
+
+        birdState = BirdState.Flying;
+        animator.SetInteger("birdState", (int)birdState);
+
+        Debug.Log("birdState BirdState.Flying");
+        StartCoroutine(ILerpPosition());
+    }
+
+    void SetNextSpot(Transform nextSpotTransform)
+    {
+    }
+
+    IEnumerator ILerpPosition()
+    {
+        Debug.Log("start lerp pos");
+        float startDistance = Vector3.Distance(startTransform.position, finishTransform.position);
+
+        while (flightProgress < 1f)
+        {
+            transform.position = Vector3.Lerp(startTransform.position, finishTransform.position, flightProgress);
+            yield return null;
+        }
+        Debug.Log("finish lerp pos");
+    }
+
+    void LerpPosition()
+    {
+        Debug.Log("start lerp pos");
+        float startDistance = Vector3.Distance(startTransform.position, finishTransform.position);
+
+        transform.position = Vector3.Lerp(startTransform.position, finishTransform.position, flightProgress * startDistance);
+
+        Debug.Log("finish lerp pos");
     }
 }

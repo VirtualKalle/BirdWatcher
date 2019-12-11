@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BirdLandingSpot : MonoBehaviour
 {
-    private bool Occupied = false;
+    public bool occupied { get; private set; } = false;
 
     // Start is called before the first frame update
     void Start()
@@ -16,5 +16,10 @@ public class BirdLandingSpot : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public TreeType GetTreeType()
+    {
+        return GetComponentInParent<TreeBehavior>().GetTreeType();
     }
 }
