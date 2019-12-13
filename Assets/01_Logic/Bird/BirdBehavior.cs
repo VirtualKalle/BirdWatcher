@@ -19,9 +19,11 @@ public class BirdBehavior : MonoBehaviour
     public BirdLandingSpot currentLandingSpot;
     public BirdLandingSpot targetLandingSpot;
 
+    LineRenderer lineRenderer;
 
     private void Awake()
     {
+        lineRenderer = GetComponent<LineRenderer>();
         animator = GetComponent<Animator>();
         birdManager = FindObjectOfType<BirdManager>();
     }
@@ -60,7 +62,7 @@ public class BirdBehavior : MonoBehaviour
         float timeLeft = countDownTime;
         while (timeLeft > 0)
         {
-            Debug.Log("Countdown: " + timeLeft);
+            //Debug.Log("Countdown: " + timeLeft);
             yield return new WaitForSeconds(1.0f);
             timeLeft--;
         }
@@ -83,15 +85,16 @@ public class BirdBehavior : MonoBehaviour
 
         if (targetLandingSpot)
         {
+
             birdManager.LeaveLandinSpot(currentLandingSpot);
 
             finishTransform = targetLandingSpot.transform;
-
+            DrawFlightPath();
             birdState = BirdState.Flying;
             animator.SetInteger("birdState", (int)birdState);
             StartCoroutine(ILerpRotation());
 
-            Debug.Log("birdState BirdState.Flying");
+            //Debug.Log("birdState BirdState.Flying");
             StartCoroutine(ILerpPosition());
         }
         else
@@ -105,7 +108,7 @@ public class BirdBehavior : MonoBehaviour
 
     IEnumerator ILerpPosition()
     {
-        Debug.Log("start lerp pos");
+        //Debug.Log("start lerp pos");
         float startDistance = Vector3.Distance(startTransform.position, finishTransform.position);
 
         while (flightProgress < 1f)
@@ -114,7 +117,7 @@ public class BirdBehavior : MonoBehaviour
             transform.position = new Vector3(transform.position.x, startTransform.position.y + 0.5f * (-Mathf.Pow(flightProgress * 2 - 1f, 2) + 1f), transform.position.z);
             yield return null;
         }
-        Debug.Log("finish lerp pos");
+        //Debug.Log("finish lerp pos");
     }
 
     IEnumerator ILerpRotation()
@@ -127,8 +130,22 @@ public class BirdBehavior : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 1);
             yield return new WaitForSeconds(.01f);
         }
-        Debug.Log("finish lerp pos");
+        //Debug.Log("finish lerp pos");
 
     }
 
+    void DrawFlightPath()
+    {
+        int drawResolution = 100;
+        Vector3[] positions = new Vector3[drawResolution];
+        Vector3 pos;
+        for (int i = 0; i < drawResolution; i++)
+        {
+            pos = startTransform.position + (finishTransform.position - startTransform.position) * i / drawResolution;
+            pos.y += 0.5f * (-Mathf.Pow((float) i / drawResolution * 2 - 1f, 2) + 1f);
+            positions[i] = pos;
+        }
+        lineRenderer.positionCount = drawResolution;
+        lineRenderer.SetPositions(positions);
+    }
 }

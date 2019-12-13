@@ -33,7 +33,6 @@ public class BirdManager : MonoBehaviour
         {
             if (UnoccupiedSpots[i].GetTreeType() == desiredTreeType)
             {
-                Debug.Log("found " + UnoccupiedSpots[i]);
                 BirdLandingSpot toReturn = UnoccupiedSpots[i];
                 UnoccupiedSpots.Remove(UnoccupiedSpots[i]);
                 return toReturn;
