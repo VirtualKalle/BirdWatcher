@@ -9,12 +9,20 @@ public class BinocularGaze : MonoBehaviour
     [SerializeField] Transform FocusPoint_L;
     [SerializeField] Transform FocusPoint_R;
 
+
+    [SerializeField] MeshCollider VisionCone_L;
+    [SerializeField] MeshCollider VisionCone_R;
+
+    List<BirdBehavior> spottedBirds;
     private List<BirdBehavior> birds;
     Camera cam;
     Plane[] planes;
 
+    public float maxAngleToDetectBird { get; private set; } = 20;
+
     private void Awake()
     {
+        spottedBirds = new List<BirdBehavior>();
         if (!birdManager)
         {
             birdManager = FindObjectOfType<BirdManager>();
@@ -24,15 +32,11 @@ public class BinocularGaze : MonoBehaviour
 
         cam = Camera.main;
     }
-    
+
 
     void Update()
     {
-
-        VectorDotGaze(FocusPoint_L);
-        VectorDotGaze(FocusPoint_R);
-        //FrustumPlaneGaze();
-
+        SpottedBirds();
     }
 
 
@@ -41,15 +45,43 @@ public class BinocularGaze : MonoBehaviour
         for (int i = 0; i < birds.Count; i++)
         {
             float angle = Mathf.Acos(Vector3.Dot((focusPoint.position - cam.transform.position).normalized, (birds[i].transform.position - cam.transform.position).normalized)) * Mathf.Rad2Deg;
-            //Debug.Log(birds[i].transform.position);
-            //Debug.Log(angle);
 
-            if (angle < 10)
+            if (angle < maxAngleToDetectBird)
             {
                 birds[i].SpottedByGaze();
             }
         }
     }
 
+    public void OnTriggerEnterVisionCone(Collider other)
+    {
+
+        BirdBehavior bird = other.GetComponentInParent<BirdBehavior>();
+
+        if (bird)
+        {
+            spottedBirds.Add(bird);
+        }
+    }
+
+    public void OnTriggerExitVisionCone(Collider other)
+    {
+
+        BirdBehavior bird = other.GetComponentInParent<BirdBehavior>();
+
+        if (bird)
+        {
+            spottedBirds.Remove(bird);
+        }
+    }
+
+
+    void SpottedBirds()
+    {
+        for (int i = 0; i < spottedBirds.Count; i++)
+        {
+            spottedBirds[i].SpottedByGaze();
+        }
+    }
 
 }
