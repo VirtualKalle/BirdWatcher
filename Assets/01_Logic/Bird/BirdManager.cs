@@ -4,71 +4,82 @@ using UnityEngine;
 
 public class BirdManager : MonoBehaviour
 {
-
-    [SerializeField] BirdLandingSpot[] birdLandingSpots;
-    List<BirdLandingSpot> UnoccupiedSpots;
     [SerializeField] GameObject birdPrefab;
-    public List<BirdBehavior> birds;
+    public List<BirdLandingSpot> birdLandingSpots;
+    [HideInInspector] public List<BirdBehavior> birds;
+
+    private List<BirdLandingSpot> UnoccupiedSpots;
 
     private void Awake()
     {
-        UpdateListOfLandingSpots();
+        birds = new List<BirdBehavior>();
         UnoccupiedSpots = new List<BirdLandingSpot>(birdLandingSpots);
+        UpdateListOfLandingSpots();
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        SpawnBirds(0.5f);
+        SpawnBirds();
     }
 
     public void UpdateListOfLandingSpots()
     {
-        birdLandingSpots = FindObjectsOfType<BirdLandingSpot>();
+        birdLandingSpots = new List<BirdLandingSpot>(FindObjectsOfType<BirdLandingSpot>());
     }
+
+    private void SpawnBirds()
+    {
+        GameObject bird;
+
+        for (int i = 0; i < birdLandingSpots.Count; i++)
+        {
+            if (birdLandingSpots[i].birdToSpawn)
+            {
+                bird = Instantiate(birdPrefab, birdLandingSpots[i].transform.position, birdLandingSpots[i].transform.rotation);
+                BirdBehavior birdBehavior = bird.GetComponent<BirdBehavior>();
+                birds.Add(birdBehavior);
+                birdBehavior.currentLandingSpot = birdLandingSpots[i];
+                birdBehavior.SetColor(birdLandingSpots[i].birdToSpawn.birdMaterial);
+                birdBehavior.treePreference = birdLandingSpots[i].birdToSpawn.treePreference;
+
+                UnoccupiedSpots.Remove(birdLandingSpots[i]);
+            }
+        }
+    }
+
 
     public BirdLandingSpot GetNewLandingSpot(TreeType desiredTreeType)
     {
         for (int i = 0; i < UnoccupiedSpots.Count; i++)
         {
-            if (UnoccupiedSpots[i].GetTreeType() == desiredTreeType)
+            if (UnoccupiedSpots[i].GetTreeType() == desiredTreeType && !UnoccupiedSpots[i].inFrustum)
             {
                 BirdLandingSpot toReturn = UnoccupiedSpots[i];
                 UnoccupiedSpots.Remove(UnoccupiedSpots[i]);
                 return toReturn;
             }
         }
-        Debug.Log("didnt find " + desiredTreeType);
         return null;
     }
 
     public BirdLandingSpot GetNewLandingSpot()
     {
-        TreeType desiredTreeType = (TreeType)Random.Range(0, 1);
-        return GetNewLandingSpot(desiredTreeType);
+        for (int i = 0; i < UnoccupiedSpots.Count; i++)
+        {
+            if (!UnoccupiedSpots[i].inFrustum)
+            {
+                BirdLandingSpot toReturn = UnoccupiedSpots[i];
+                UnoccupiedSpots.Remove(UnoccupiedSpots[i]);
+                return toReturn;
+            }
+        }
+        return null;
     }
 
-    public void LeaveLandinSpot(BirdLandingSpot spot)
+    public void LeaveLandingSpot(BirdLandingSpot spot)
     {
         UnoccupiedSpots.Add(spot);
     }
 
-    private void SpawnBirds(float ratio = 1f)
-    {
-
-        int nrOfBirdsToSpawn = Mathf.Max(1, (int)(birdLandingSpots.Length * ratio));
-
-        //Create a randomized queue of landingspots
-
-        GameObject bird;
-
-        for (int i = 0; i < nrOfBirdsToSpawn; i++)
-        {
-            bird = Instantiate(birdPrefab, birdLandingSpots[i].transform.position, birdLandingSpots[i].transform.rotation);
-            birds.Add(bird.GetComponent<BirdBehavior>());
-            bird.GetComponent<BirdBehavior>().currentLandingSpot = birdLandingSpots[i];
-            UnoccupiedSpots.Remove(birdLandingSpots[i]);
-        }
-    }
 
 }

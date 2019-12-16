@@ -8,80 +8,120 @@ public class BinocularGaze : MonoBehaviour
     [SerializeField] BirdManager birdManager;
     [SerializeField] Transform FocusPoint_L;
     [SerializeField] Transform FocusPoint_R;
+    [SerializeField] Camera cam;
 
-
-    [SerializeField] MeshCollider VisionCone_L;
-    [SerializeField] MeshCollider VisionCone_R;
-
-    List<BirdBehavior> spottedBirds;
     private List<BirdBehavior> birds;
-    Camera cam;
-    Plane[] planes;
+    private List<BirdLandingSpot> landingSpots;
 
-    public float maxAngleToDetectBird { get; private set; } = 20;
+    public float maxAngleToDetectBird = 25;
 
     private void Awake()
     {
-        spottedBirds = new List<BirdBehavior>();
         if (!birdManager)
         {
             birdManager = FindObjectOfType<BirdManager>();
         }
 
-        birds = birdManager.birds;
+        birds = new List<BirdBehavior>();
+        landingSpots = new List<BirdLandingSpot>();
 
-        cam = Camera.main;
+        if (!cam)
+        {
+            cam = Camera.main;
+        }
+    }
+
+    private void Start()
+    {
+        landingSpots = birdManager.birdLandingSpots;
+        birds = birdManager.birds;
     }
 
 
     void Update()
     {
-        SpottedBirds();
+        GazeForLandingSpots();
+        GazeForBirds();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Matrix4x4 initialMatrix = Gizmos.matrix;
+        Gizmos.matrix = Matrix4x4.TRS(cam.transform.position, cam.transform.rotation, Vector3.one);
+        Gizmos.DrawFrustum(Vector3.zero, cam.fieldOfView, cam.farClipPlane, cam.nearClipPlane, cam.aspect);
+
+        Gizmos.matrix = initialMatrix;
     }
 
 
-    void VectorDotGaze(Transform focusPoint)
+    void GazeForBirds()
     {
+        Vector3 focusPointPos_L = FocusPoint_L.position;
+        Vector3 focusPointPos_R = FocusPoint_R.position;
+        Vector3 camPos = cam.transform.position;
+        
         for (int i = 0; i < birds.Count; i++)
         {
-            float angle = Mathf.Acos(Vector3.Dot((focusPoint.position - cam.transform.position).normalized, (birds[i].transform.position - cam.transform.position).normalized)) * Mathf.Rad2Deg;
+            float angle_L = Mathf.Acos(Vector3.Dot((focusPointPos_L - camPos).normalized, (birds[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
+            float angle_R = Mathf.Acos(Vector3.Dot((focusPointPos_R - camPos).normalized, (birds[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
 
-            if (angle < maxAngleToDetectBird)
+            if (angle_L < maxAngleToDetectBird || angle_R < maxAngleToDetectBird)
             {
                 birds[i].SpottedByGaze();
             }
         }
     }
 
-    public void OnTriggerEnterVisionCone(Collider other)
+
+    void GazeForLandingSpots()
     {
+        Vector3 focusPointPos_L = FocusPoint_L.position;
+        Vector3 focusPointPos_R = FocusPoint_R.position;
+        Vector3 camPos = cam.transform.position;
 
-        BirdBehavior bird = other.GetComponentInParent<BirdBehavior>();
-
-        if (bird)
+        for (int i = 0; i < landingSpots.Count; i++)
         {
-            spottedBirds.Add(bird);
+            float angle_L = Mathf.Acos(Vector3.Dot((focusPointPos_L - camPos).normalized, (landingSpots[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
+            float angle_R = Mathf.Acos(Vector3.Dot((focusPointPos_R - camPos).normalized, (landingSpots[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
+
+            if (angle_L < maxAngleToDetectBird || angle_R < maxAngleToDetectBird)
+            {
+                landingSpots[i].inFrustum = true;
+            }
+            else
+            {
+                landingSpots[i].inFrustum = false;
+            }
         }
     }
 
-    public void OnTriggerExitVisionCone(Collider other)
+
+    // TODO: Build a generic for Gaze using interface Spotted(), Hidden()
+    /*
+    void Gaze<T>(List<T> objList)
     {
+        Vector3 focusPointPos_L = FocusPoint_L.position;
+        Vector3 focusPointPos_R = FocusPoint_R.position;
+        Vector3 camPos = cam.transform.position;
 
-        BirdBehavior bird = other.GetComponentInParent<BirdBehavior>();
-
-        if (bird)
+        //List<Transform> transforms = objList as List<Transform>;
+        for (int i = 0; i < objList.Count; i++)
         {
-            spottedBirds.Remove(bird);
+            float angle_L = Mathf.Acos(Vector3.Dot((focusPointPos_L - camPos).normalized, (objList[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
+            float angle_R = Mathf.Acos(Vector3.Dot((focusPointPos_R - camPos).normalized, (objList[i].transform.position - camPos).normalized)) * Mathf.Rad2Deg;
+            
+            if (angle_L < maxAngleToDetectBird || angle_R < maxAngleToDetectBird)
+            {
+                objList[i].Spotted()
+            }
+            else
+            {
+                objList[i].Hidden()
+            }  
         }
-    }
 
 
-    void SpottedBirds()
-    {
-        for (int i = 0; i < spottedBirds.Count; i++)
-        {
-            spottedBirds[i].SpottedByGaze();
-        }
     }
+    */
 
 }

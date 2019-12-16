@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TreeBehavior : MonoBehaviour
 {
-    [SerializeField] private TreeType treeType;
+    [SerializeField] private TreeType treeType = TreeType.Leaves;
 
     public TreeType GetTreeType()
     {

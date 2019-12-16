@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/03_Scenes/BirdWatcher.unity
+    guid: ba820891336a6214ab38c1b68f734dda
   m_configObjects: {}

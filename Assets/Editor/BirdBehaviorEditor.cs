@@ -10,9 +10,9 @@ public class BirdBehaviorEditor : Editor
         DrawDefaultInspector();
         BirdBehavior birdBehavior = (BirdBehavior)target;
 
-        if (GUILayout.Button("FlyToNextSpot"))
+        if (GUILayout.Button("SpottedByGaze"))
         {
-            birdBehavior.FlyToNextSpot();
+            birdBehavior.SpottedByGaze();
         }
     }
 }

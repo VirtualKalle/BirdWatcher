@@ -6,7 +6,8 @@ using UnityEngine;
 public class VisionGizmo : MonoBehaviour
 {
     [SerializeField] Transform FocusPoint;
-    [SerializeField] float baseScale;
+    [SerializeField] float baseScale = 500;
+
     private BinocularGaze binocularGaze;
 
     private void Awake()
@@ -14,34 +15,22 @@ public class VisionGizmo : MonoBehaviour
         binocularGaze = GetComponentInParent<BinocularGaze>();
     }
 
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
         transform.LookAt(FocusPoint);
         AdjustCone();
     }
 
-    void AdjustCone()
+    private void AdjustCone()
     {
         float angle = binocularGaze.maxAngleToDetectBird;
         transform.localScale = new Vector3(baseScale * angle / 30, baseScale * angle / 30, baseScale);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         transform.LookAt(FocusPoint);
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        binocularGaze.OnTriggerEnterVisionCone(other);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        binocularGaze.OnTriggerExitVisionCone(other);
-    }
-
 
 }

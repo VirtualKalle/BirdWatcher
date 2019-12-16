@@ -15,13 +15,8 @@ public class PlayerLocomotion : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -30,11 +25,8 @@ public class PlayerLocomotion : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-
-
             RotateCamera();
             lastMousePosition = Input.mousePosition;
-            //Debug.Log(Input.mousePosition);
         }
 
     }

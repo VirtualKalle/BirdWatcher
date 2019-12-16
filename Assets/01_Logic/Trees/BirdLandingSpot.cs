@@ -4,22 +4,18 @@ using UnityEngine;
 
 public class BirdLandingSpot : MonoBehaviour
 {
-    public bool occupied { get; private set; } = false;
-
-    // Start is called before the first frame update
-    void Start()
+    public bool inFrustum = false;
+    public BirdTypeScriptableObject birdToSpawn;
+    [SerializeField] MeshRenderer meshRenderer;
+    
+    private void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        meshRenderer.enabled = false;
     }
 
     public TreeType GetTreeType()
     {
         return GetComponentInParent<TreeBehavior>().GetTreeType();
     }
+
 }
